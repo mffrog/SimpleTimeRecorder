@@ -1,0 +1,130 @@
+﻿<Application x:Class="SimpleTimeRecorder.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SimpleTimeRecorder"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="ButtonDefault" Color="#333333"/>
+        <SolidColorBrush x:Key="BaseColor" Color="Black"/>
+        <SolidColorBrush x:Key="DarkGray" Color="#FF191919"/>
+        <SolidColorBrush x:Key="MainColor" Color="#FF3C3C3C"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#FF3C3C3C"/>
+        <SolidColorBrush x:Key="TriggerColor" Color="#FF4C4C4C"/>
+        <SolidColorBrush x:Key="HighlightColor" Color="#FF5C5C5C"/>
+        <SolidColorBrush x:Key="OnHover" Color="Gray"/>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="Grid" Background="{StaticResource ButtonDefault}">
+                            <Border Name="Border" BorderThickness="0" BorderBrush="{StaticResource ButtonDefault}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Grid" Property="Background" Value="{StaticResource OnHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsDefault" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+
+                            </Trigger>
+                            <!--<Trigger Property="IsFocused" Value="False">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+                            </Trigger>-->
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SystemButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="Grid" Background="{StaticResource AccentColor}">
+                            <!--<Border Name="Border" BorderThickness="0" BorderBrush="{StaticResource ButtonDefault}"/>-->
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Grid" Property="Background" Value="{StaticResource HighlightColor}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Grid" Property="Background" Value="{StaticResource TriggerColor}"/>
+                            </Trigger>
+                            <Trigger Property="IsDefault" Value="True">
+
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InputBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="50"/>
+            <!--<Setter Property="Height" Value="20"/>-->
+            <Setter Property="Background" Value="#FF232323"/>
+
+            <Setter Property="CaretBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="Black"/>
+                </Setter.Value>
+            </Setter>
+
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid Background="{StaticResource AccentColor}">
+                            <Border Name="Border" BorderThickness="2"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TextBlock" Text="" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource MainColor}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="False">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource TriggerColor}"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Application.Resources>
+</Application>
