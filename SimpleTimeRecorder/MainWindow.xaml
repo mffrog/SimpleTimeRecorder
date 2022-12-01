@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SimpleTimeRecorder"
         mc:Ignorable="d"
         WindowStyle="None"
-        Title="SimpleTimerRecorder" Height="250" Width="450" BorderBrush="Black" BorderThickness="0" Focusable="True">
+        Title="SimpleTimerRecorder" Topmost="True" MinHeight="250" MaxHeight="800" Height="250" Width="450" BorderBrush="Black" BorderThickness="0" Focusable="True">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"/>
     </WindowChrome.WindowChrome>
@@ -15,34 +15,43 @@
             <Setter Property="Background" Value="{StaticResource AccentColor}"/>
         </Style>
     </Window.Resources>
-    <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
-        <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2"/>
-        <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="32" Background="{StaticResource AccentColor}">
-            <TextBlock Text="SimpleTimeRecorder" Foreground="GhostWhite" TextAlignment="Left" Canvas.Left="10" Canvas.Top="8" FontFamily="Calibri"/>
-            <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Left="400" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
+    <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2" VerticalAlignment="Stretch">
+        <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="32" Background="{StaticResource AccentColor}">
+                <TextBlock Text="SimpleTimeRecorder" Foreground="GhostWhite" TextAlignment="Left" Canvas.Left="10" Canvas.Top="8" FontFamily="Calibri"/>
+                <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Left="400" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
+                </Button>
+
+            </Canvas>
+            <Canvas Width="48" HorizontalAlignment="Left" Margin="0,32,0,0">
+                <StackPanel>
+                    <Button x:Name="RegisterSaveDirectoryButton" Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
+                    <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
+                </StackPanel>
+            </Canvas>
+
+            <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" Text="Action" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28" KeyDown="ActionTextBox_KeyDown">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+                        <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,152,0,0" VerticalAlignment="Top" Height="48" Width="284" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
+                <TextBlock Text="Save" FontSize="24" FontFamily="Calibri">
+                </TextBlock>
             </Button>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                <StackPanel x:Name="RecordStack" Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch" Margin="2,0">
 
-        </Canvas>
-        <Canvas Width="48" HorizontalAlignment="Left" Margin="2,32,0,0">
-            <StackPanel>
-                <Button x:Name="RegisterSaveDirectoryButton" Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
-                <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}"/>
-            </StackPanel>
-        </Canvas>
-
-        <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" Text="Action" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28">
-            <TextBox.Style>
-                <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
-                    <Setter Property="Foreground" Value="White"/>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
-
-        <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,152,0,0" VerticalAlignment="Top" Height="48" Width="284" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
-            <TextBlock Text="Save" FontSize="24" FontFamily="Calibri">
-            </TextBlock>
-        </Button>
-
-    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
 </Window>
 

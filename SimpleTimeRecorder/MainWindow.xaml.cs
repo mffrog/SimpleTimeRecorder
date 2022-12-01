@@ -38,6 +38,7 @@ namespace SimpleTimeRecorder
             } 
         }
         private DateTime LastSaveTime { get; set; }
+        private bool RecordVisible = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -61,16 +62,34 @@ namespace SimpleTimeRecorder
 
         }
 
-        private void SaveClicked(object sender, RoutedEventArgs e)
+        private Record AddRecord(string actionText, DateTime dateTime)
         {
+            var record = new Record();
+            record.ActionText.Text = actionText;
+            record.Time.Text = dateTime.ToString("H:mm");
+            RecordStack.Children.Insert(0,record);
+            return record;
+        }
 
+        private void SaveCurrent()
+        {
             StreamWriter writer = new StreamWriter(SaveFileFullPath, true);
             DateTime now = DateTime.Now;
             var sub = (now - LastSaveTime);
 
             writer.WriteLine($"<Text=\"{ActionTextBox.Text}\" Time=\"{sub.Hours}:{sub.Minutes}\" Date=\"{now.ToString("yyyy-MM-dd-HH-mm:ss")}\">");
             writer.Close();
+
+            AddRecord(ActionTextBox.Text, now);
+            UpdateWindowSize();
             LastSaveTime = now;
+            ActionTextBox.Text = string.Empty;
+
+        }
+
+        private void SaveClicked(object sender, RoutedEventArgs e)
+        {
+            SaveCurrent();
         }
 
         private void CloseClicked(object sender, RoutedEventArgs e)
@@ -90,6 +109,31 @@ namespace SimpleTimeRecorder
             SaveDirectory = Directry;
             Properties.Settings.Default.SaveDirectoryName = SaveDirectory;
             Properties.Settings.Default.Save();
+        }
+
+        private void ActionTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == Key.Enter)
+            {
+                SaveCurrent();
+            }
+        }
+        private void UpdateWindowSize()
+        {
+            RecordStack.UpdateLayout();
+            if (RecordVisible)
+            {
+                Height = MinHeight + RecordStack.ActualHeight;
+            }
+            else
+            {
+                Height = MinHeight;
+            }
+        }
+        private void ShowRecord(object sender, RoutedEventArgs e)
+        {
+            RecordVisible = !RecordVisible;
+            UpdateWindowSize();
         }
     }
 }
