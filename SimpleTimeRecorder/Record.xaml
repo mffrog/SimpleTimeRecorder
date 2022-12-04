@@ -7,8 +7,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="450" Foreground="{x:Null}">
     <Grid>
-        <Rectangle Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Rectangle Grid.ColumnSpan="2" Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
         <TextBlock x:Name="Time" Text="HH:mm" FontSize="18" Foreground="White" Margin="2"/>
-        <TextBlock x:Name="ActionText" Text="Action" FontSize="28" HorizontalAlignment="Right" Foreground="White" Margin="0,0,2,2" VerticalAlignment="Bottom"/>
+        <TextBlock x:Name="ActionText" Grid.Column="1" Text="Action" TextWrapping="Wrap" FontSize="28" HorizontalAlignment="Right" Foreground="White" Margin="0,0,2,2" VerticalAlignment="Bottom"/>
     </Grid>
 </UserControl>
