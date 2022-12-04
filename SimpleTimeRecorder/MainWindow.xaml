@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SimpleTimeRecorder"
         mc:Ignorable="d"
         WindowStyle="None"
-        Title="SimpleTimerRecorder" Height="250" Width="450" BorderBrush="Black" BorderThickness="0" Focusable="True">
+        Title="SimpleTimerRecorder" Topmost="True" MinHeight="250" MaxHeight="800" Height="250" Width="450" BorderBrush="Black" BorderThickness="0" Focusable="True">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"/>
     </WindowChrome.WindowChrome>
@@ -14,35 +14,126 @@
         <Style x:Key="CustomSystemButton" TargetType="Button" BasedOn="{StaticResource SystemButton}">
             <Setter Property="Background" Value="{StaticResource AccentColor}"/>
         </Style>
+        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="Grid" Background="{StaticResource ButtonDefault}">
+                            <Border x:Name="Border" BorderThickness="0" BorderBrush="{StaticResource ButtonDefault}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Grid" Property="Background" Value="{StaticResource OnHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsDefault" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+
+                            </Trigger>
+                            <!--<Trigger Property="IsFocused" Value="False">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+                            </Trigger>-->
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
-    <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
-        <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2"/>
-        <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="32" Background="{StaticResource AccentColor}">
-            <TextBlock Text="SimpleTimeRecorder" Foreground="GhostWhite" TextAlignment="Left" Canvas.Left="10" Canvas.Top="8" FontFamily="Calibri"/>
-            <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Left="400" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
+    <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2" VerticalAlignment="Stretch">
+        <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="32" Background="{StaticResource AccentColor}">
+                <TextBlock Text="SimpleTimeRecorder" Foreground="GhostWhite" TextAlignment="Left" Canvas.Left="10" Canvas.Top="8" FontFamily="Calibri"/>
+                <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Left="400" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
+                </Button>
+
+            </Canvas>
+            <Grid x:Name="ToolBar" Width="48" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top" Height="25">
+                <Grid.Resources>
+                    <Storyboard x:Key="Maximize">
+                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="115"/>
+                    </Storyboard>
+                    <Storyboard x:Key="Minimize">
+                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="25"/>
+                    </Storyboard>
+                </Grid.Resources>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard Storyboard="{StaticResource Maximize}"/>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard Storyboard="{StaticResource Minimize}"/>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock x:Name="ToolHeader" FontFamily="Marlett" TextAlignment="Center" Foreground="White" Background="{StaticResource AccentColor}" Height="25" Margin="0" FontSize="18" VerticalAlignment="Top">
+                        <TextBlock.Style>
+                            <Style>
+                                <Setter Property="TextBlock.Text" Value="6"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMouseOver,ElementName=ToolBar}" Value="True">
+                                        <Setter Property="TextBlock.Text" Value="q"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsMouseOver,ElementName=ToolBar}" Value="False">
+                                        <Setter Property="TextBlock.Text" Value="6"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Button x:Name="RegisterSaveDirectoryButton" Content="2" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
+                    <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="OpenSaveDirectory"/>
+                    <Button Content="6" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
+                </StackPanel>
+            </Grid>
+            <TextBlock Text="EnterAction" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,43,0,175" Width="126" FontSize="24"/>
+            <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28" KeyDown="ActionTextBox_KeyDown">
+                <TextBox.Style>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+                        <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,154,0,0" VerticalAlignment="Top" Height="48" Width="172" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
+                <TextBlock Text="Save" FontSize="24" FontFamily="Calibri">
+                </TextBlock>
             </Button>
 
-        </Canvas>
-        <Canvas Width="48" HorizontalAlignment="Left" Margin="2,32,0,0">
-            <StackPanel>
-                <Button x:Name="RegisterSaveDirectoryButton" Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
-                <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}"/>
-            </StackPanel>
-        </Canvas>
+            <TextBlock x:Name="ElapsedTimerView" Foreground="White" Text="00:00:00" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="36,0,0,55" Width="68" Height="28" FontSize="18"></TextBlock>
 
-        <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" Text="Action" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28">
-            <TextBox.Style>
-                <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
-                    <Setter Property="Foreground" Value="White"/>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" Focusable="False">
+                <StackPanel x:Name="RecordStack" Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch" Margin="2,0">
 
-        <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,152,0,0" VerticalAlignment="Top" Height="48" Width="284" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
-            <TextBlock Text="Save" FontSize="24" FontFamily="Calibri">
-            </TextBlock>
-        </Button>
-
-    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
 </Window>
 
