@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Windows.Forms;
 
 using System.IO;
+using System.Windows.Threading;
 
 namespace SimpleTimeRecorder
 {
@@ -39,14 +40,18 @@ namespace SimpleTimeRecorder
         }
         private DateTime LastSaveTime { get; set; }
         private bool RecordVisible = true;
+        private DispatcherTimer ElapsedTimer = null;
         public MainWindow()
         {
             InitializeComponent();
 
             SaveDirectory = Properties.Settings.Default.SaveDirectoryName;
+
             DateTime Date = DateTime.Now;
             SaveFileName = Date.ToString("yyyy-MM-dd");
             LastSaveTime = Date;
+
+            // enable all screen drag
             MouseLeftButtonDown += (sender, e) =>
             {
                 if (Height * 0.5 < e.GetPosition(this).Y)
@@ -60,8 +65,25 @@ namespace SimpleTimeRecorder
                 DragMove();
             };
 
+            // setup elapsed timer
+            SetupElapsedTimer();
         }
+        private void SetupElapsedTimer()
+        {
+            ElapsedTimer = new DispatcherTimer();
+            ElapsedTimer.Interval = new TimeSpan(0, 0, 1);
+            ElapsedTimer.Tick += (sender, e) =>
+            {
+                var Span = (DateTime.Now - LastSaveTime);
+                ElapsedTimerView.Text = Span.ToString(@"hh\:mm\:ss");
+            };
+            ElapsedTimer.Start();
 
+            this.Closing += (sender, e) =>
+            {
+                ElapsedTimer.Stop();
+            };
+        }
         private Record AddRecord(string actionText, DateTime dateTime)
         {
             var record = new Record();
@@ -134,6 +156,14 @@ namespace SimpleTimeRecorder
         {
             RecordVisible = !RecordVisible;
             UpdateWindowSize();
+        }
+
+        private void OpenSaveDirectory(object sender, RoutedEventArgs e)
+        {
+            if(Directory.Exists(SaveDirectory))
+            {
+                System.Diagnostics.Process.Start(SaveDirectory);
+            }
         }
     }
 }

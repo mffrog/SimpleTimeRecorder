@@ -14,6 +14,46 @@
         <Style x:Key="CustomSystemButton" TargetType="Button" BasedOn="{StaticResource SystemButton}">
             <Setter Property="Background" Value="{StaticResource AccentColor}"/>
         </Style>
+        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="Grid" Background="{StaticResource ButtonDefault}">
+                            <Border x:Name="Border" BorderThickness="0" BorderBrush="{StaticResource ButtonDefault}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Grid" Property="Background" Value="{StaticResource OnHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsDefault" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource OnHover}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="2"/>
+
+                            </Trigger>
+                            <!--<Trigger Property="IsFocused" Value="False">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource ButtonDefault}"/>
+                            </Trigger>-->
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2" VerticalAlignment="Stretch">
         <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
@@ -30,7 +70,8 @@
             <Canvas Width="48" HorizontalAlignment="Left" Margin="0,32,0,0">
                 <StackPanel>
                     <Button x:Name="RegisterSaveDirectoryButton" Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
-                    <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
+                    <Button Content="q" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="OpenSaveDirectory"/>
+                    <Button Content="6" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
                 </StackPanel>
             </Canvas>
 
@@ -42,10 +83,13 @@
                 </TextBox.Style>
             </TextBox>
 
-            <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,152,0,0" VerticalAlignment="Top" Height="48" Width="284" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
+            <Button x:Name="SaveButton" HorizontalAlignment="Center" Margin="0,154,0,0" VerticalAlignment="Top" Height="48" Width="172" Click="SaveClicked" BorderBrush="Gray" BorderThickness="3">
                 <TextBlock Text="Save" FontSize="24" FontFamily="Calibri">
                 </TextBlock>
             </Button>
+
+            <TextBlock x:Name="ElapsedTimerView" Foreground="White" Text="00:00:00" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="36,0,0,55" Width="68" Height="28" FontSize="18"></TextBlock>
+
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
                 <StackPanel x:Name="RecordStack" Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch" Margin="2,0">
 
