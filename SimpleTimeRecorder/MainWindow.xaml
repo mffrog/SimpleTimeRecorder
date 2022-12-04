@@ -68,13 +68,50 @@
                 </Button>
 
             </Canvas>
-            <Canvas Width="48" HorizontalAlignment="Left" Margin="0,32,0,0">
-                <StackPanel>
-                    <Button x:Name="RegisterSaveDirectoryButton" Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
-                    <Button Content="q" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="OpenSaveDirectory"/>
+            <Grid x:Name="ToolBar" Width="48" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top" Height="25">
+                <Grid.Resources>
+                    <Storyboard x:Key="Maximize">
+                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="115"/>
+                    </Storyboard>
+                    <Storyboard x:Key="Minimize">
+                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="25"/>
+                    </Storyboard>
+                </Grid.Resources>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard Storyboard="{StaticResource Maximize}"/>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard Storyboard="{StaticResource Minimize}"/>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock x:Name="ToolHeader" FontFamily="Marlett" TextAlignment="Center" Foreground="White" Background="{StaticResource AccentColor}" Height="25" Margin="0" FontSize="18" VerticalAlignment="Top">
+                        <TextBlock.Style>
+                            <Style>
+                                <Setter Property="TextBlock.Text" Value="6"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMouseOver,ElementName=ToolBar}" Value="True">
+                                        <Setter Property="TextBlock.Text" Value="q"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsMouseOver,ElementName=ToolBar}" Value="False">
+                                        <Setter Property="TextBlock.Text" Value="6"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Button x:Name="RegisterSaveDirectoryButton" Content="2" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
+                    <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="OpenSaveDirectory"/>
                     <Button Content="6" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
                 </StackPanel>
-            </Canvas>
+            </Grid>
             <TextBlock Text="EnterAction" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,43,0,175" Width="126" FontSize="24"/>
             <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28" KeyDown="ActionTextBox_KeyDown">
                 <TextBox.Style>
