@@ -54,6 +54,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </Window.Resources>
     <Border BorderBrush="{StaticResource AccentColor}" BorderThickness="2" VerticalAlignment="Stretch">
         <Grid x:Name="BaseGrid" Background="Black" Focusable="True">
@@ -74,8 +75,8 @@
                     <Button Content="6" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
                 </StackPanel>
             </Canvas>
-
-            <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" Text="Action" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28" KeyDown="ActionTextBox_KeyDown">
+            <TextBlock Text="EnterAction" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,43,0,175" Width="126" FontSize="24"/>
+            <TextBox x:Name="ActionTextBox" HorizontalAlignment="Center" CaretBrush="Gray" Margin="0,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="284" Height="45" FontFamily="Calibri" FontSize="28" KeyDown="ActionTextBox_KeyDown">
                 <TextBox.Style>
                     <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
                         <Setter Property="Foreground" Value="White"/>
@@ -90,7 +91,7 @@
 
             <TextBlock x:Name="ElapsedTimerView" Foreground="White" Text="00:00:00" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="36,0,0,55" Width="68" Height="28" FontSize="18"></TextBlock>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden" Focusable="False">
                 <StackPanel x:Name="RecordStack" Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch" Margin="2,0">
 
                 </StackPanel>

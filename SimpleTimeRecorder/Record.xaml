@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SimpleTimeRecorder"
              mc:Ignorable="d" 
-             d:DesignHeight="50" d:DesignWidth="450">
-    <Grid Background="{StaticResource BaseColor}">
+             d:DesignHeight="50" d:DesignWidth="450" Foreground="{x:Null}">
+    <Grid>
         <Rectangle Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
         <TextBlock x:Name="Time" Text="HH:mm" FontSize="18" Foreground="White" Margin="2"/>
         <TextBlock x:Name="ActionText" Text="Action" FontSize="28" HorizontalAlignment="Right" Foreground="White" Margin="0,0,2,2" VerticalAlignment="Bottom"/>
