@@ -37,7 +37,7 @@ namespace SimpleTimeRecorder
         { 
             get
             {
-                return SaveDirectory + "\\" +  SaveFileName + ".txt";
+                return SaveDirectory + "\\" +  SaveFileName + ".json";
             } 
         }
         private DateTime LastSaveTime { get; set; }
