@@ -91,15 +91,29 @@ namespace SimpleTimeRecorder
     /// </summary>
     public partial class Record : UserControl
     {
+        public RecordData Data
+        {
+            get
+            {
+                return data;
+            }
+            set
+            {
+                data = value;
+                Time.Text = data.Date.ToString(@"H:mm");
+                ActionText.Text = data.ActionText;
+            }
+        }
+        private RecordData data;
+        public EventHandler OnDataModified;
         public Record()
         {
             InitializeComponent();
-        }
-        public bool Init(RecordData data)
-        {
-            Time.Text = data.Date.ToString(@"H:mm");
-            ActionText.Text = data.ActionText;
-            return true;
+            ActionText.OnEditBoxModified += (s,e)=> 
+            {
+                data.ActionText = ActionText.Text;
+                OnDataModified?.Invoke(s,e); 
+            };
         }
     }
 }
