@@ -17,7 +17,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Windows.Threading;
 using System.Text.Json;
-
+using System.Text.Unicode;
 
 namespace SimpleTimeRecorder
 {
@@ -142,11 +142,12 @@ namespace SimpleTimeRecorder
             AddRecord(ActionTextBox.Text, now, sub);
             JsonSerializerOptions options = new JsonSerializerOptions
             {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All),
                 WriteIndented = true,
             };
             
             string JsonString = JsonSerializer.Serialize(Records,options);
-            StreamWriter writer = new StreamWriter(SaveFileFullPath, false);
+            StreamWriter writer = new StreamWriter(SaveFileFullPath, false, Encoding.UTF8);
             writer.Write(JsonString);
             writer.Close();
 
