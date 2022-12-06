@@ -6,13 +6,16 @@
              xmlns:local="clr-namespace:SimpleTimeRecorder"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="450" Foreground="{x:Null}">
-    <Grid>
+    <Grid VerticalAlignment="Top">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="70"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Rectangle Grid.ColumnSpan="2" Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
-        <TextBlock x:Name="Time" Text="HH:mm" FontSize="18" Foreground="White" Margin="2"/>
-        <TextBlock x:Name="ActionText" Grid.Column="1" Text="Action" TextWrapping="Wrap" FontSize="28" HorizontalAlignment="Right" Foreground="White" Margin="0,0,2,2" VerticalAlignment="Bottom"/>
+        <Rectangle Grid.ColumnSpan="3" Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
+        <StackPanel>
+            <TextBlock x:Name="Time" Text="HH:mm" FontSize="16" Foreground="White" Margin="2"/>
+            <TextBlock x:Name="Elapsed" Text="HH:mm" FontSize="16" Foreground="White" Margin="2" Visibility="Collapsed"/>
+        </StackPanel>
+        <local:EditableTextBlock x:Name="ActionText" Text="Action" FontSize="28" Grid.Column="1" Foreground="White" Margin="2,2,0,0"/>
     </Grid>
 </UserControl>

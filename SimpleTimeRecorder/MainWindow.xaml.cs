@@ -17,6 +17,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Windows.Threading;
 using System.Text.Json;
+using System.Text.Unicode;
 
 
 namespace SimpleTimeRecorder
@@ -43,7 +44,17 @@ namespace SimpleTimeRecorder
         private DateTime LastSaveTime { get; set; }
         private bool RecordVisible = true;
         private DispatcherTimer ElapsedTimer = null;
-        private List<RecordData> Records = new List<RecordData>();
+        private List<RecordData> Records
+        {
+            get
+            {
+                var recordList = RecordStack.Children.OfType<Record>();
+                var ret= recordList.Select(r => { return r.Data; }).ToList();
+                ret.Reverse();
+                return ret;
+            }
+        }
+        private List<Record> RecordControls = new List<Record>();
 
         public MainWindow()
         {
@@ -105,7 +116,8 @@ namespace SimpleTimeRecorder
             List<RecordData> TmpRecords = JsonSerializer.Deserialize<List<RecordData>>(JsonString);
             TmpRecords.ForEach((r) => 
             {
-                AddRecord(r.ActionText, r.Date, r.Elapsed);
+                Record record = AddRecord(r.ActionText, r.Date, r.Elapsed,true);
+                RegisterCallback(record);
             });
 
             EventHandler copy=null;
@@ -118,7 +130,14 @@ namespace SimpleTimeRecorder
             ContentRendered += action;
             return true;
         }
-        private Record AddRecord(string actionText, DateTime dateTime, TimeSpan span)
+        private void RegisterCallback(Record record)
+        {
+            record.OnDataModified += (s, e) =>
+            {
+                ExportRecords();
+            };
+        }
+        private Record AddRecord(string actionText, DateTime dateTime, TimeSpan span, bool registerCallabck)
         {
             var data = new RecordData
             {
@@ -126,29 +145,35 @@ namespace SimpleTimeRecorder
                 ActionText = actionText,
                 Elapsed = span
             };
-            Records.Add(data);
-
+            
             var record = new Record();
-            record.Init(data);
-                
+            record.Data = data;
+            if(registerCallabck)
+            {
+                RegisterCallback(record);
+            }
             RecordStack.Children.Insert(0,record);
             return record;
         }
-
+        private void ExportRecords()
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All),
+                WriteIndented = true,
+            };
+            string JsonString = JsonSerializer.Serialize(Records, options);
+            StreamWriter writer = new StreamWriter(SaveFileFullPath, false, Encoding.UTF8);
+            writer.Write(JsonString);
+            writer.Close();
+        }
         private void SaveCurrent()
         {
             DateTime now = DateTime.Now;
             var sub = (now - LastSaveTime);
-            AddRecord(ActionTextBox.Text, now, sub);
-            JsonSerializerOptions options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-            };
+            AddRecord(ActionTextBox.Text, now, sub,true);
             
-            string JsonString = JsonSerializer.Serialize(Records,options);
-            StreamWriter writer = new StreamWriter(SaveFileFullPath, false);
-            writer.Write(JsonString);
-            writer.Close();
+            ExportRecords();
 
             UpdateWindowSize();
             LastSaveTime = now;
