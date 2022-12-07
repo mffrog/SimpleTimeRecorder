@@ -25,6 +25,16 @@ namespace SimpleTimeRecorder
         public DateTime Date { get; set; }
         public TimeSpan Elapsed { get; set; }
         public string ActionText { get; set; }
+        public static bool operator ==(RecordData lhs, RecordData rhs)
+        {
+            return lhs.Date == rhs.Date &&
+                lhs.Elapsed == rhs.Elapsed &&
+                lhs.ActionText == rhs.ActionText;
+        }
+        public static bool operator !=(RecordData lhs, RecordData rhs)
+        {
+            return !(lhs == rhs);
+        }
     }
     public class RecordDataJsonConverter : JsonConverter<RecordData>
     {
@@ -86,6 +96,27 @@ namespace SimpleTimeRecorder
             writer.WriteEndObject();
         }
     }
+    public class TimeTextValidater : IEditTextValidater
+    {
+        private Record record = null;
+        public TimeTextValidater(Record record)
+        {
+            this.record = record;
+        }
+        public bool IsTextValid(string Text)
+        {
+            DateTime newDate;
+            if(!DateTime.TryParseExact(Text, @"H:mm", null, DateTimeStyles.None, out newDate))
+            {
+                return false;
+            }
+            if(newDate < (record.Data.Date - record.Data.Elapsed))
+            {
+                return false;
+            }
+            return true;
+        }
+    }
     /// <summary>
     /// Record.xaml の相互作用ロジック
     /// </summary>
@@ -112,7 +143,25 @@ namespace SimpleTimeRecorder
             ActionText.OnEditBoxModified += (s,e)=> 
             {
                 data.ActionText = ActionText.Text;
-                OnDataModified?.Invoke(s,e); 
+                OnDataModified?.Invoke(this,e); 
+            };
+            Time.Validater = new TimeTextValidater(this);
+            Time.OnEditBoxModified += (s, e) =>
+            {
+                DateTime date = data.Date;
+                if(DateTime.TryParseExact(Time.Text, @"H:mm", null,DateTimeStyles.None, out date))
+                {
+                    data.Date = new DateTime
+                    (
+                    date.Date.Year,
+                    date.Date.Month,
+                    date.Date.Day,
+                    date.Hour,
+                    date.Minute,
+                    date.Date.Second
+                    );
+                    OnDataModified?.Invoke(this, e);
+                }
             };
         }
     }

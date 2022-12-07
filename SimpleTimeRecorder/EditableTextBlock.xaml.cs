@@ -15,6 +15,10 @@ using System.Windows.Shapes;
 
 namespace SimpleTimeRecorder
 {
+    public interface IEditTextValidater
+    {
+        bool IsTextValid(string Text);
+    }
     /// <summary>
     /// EditableTextBlock.xaml の相互作用ロジック
     /// </summary>
@@ -32,7 +36,10 @@ namespace SimpleTimeRecorder
             get { return GetValue(TextProperty) as string; }
             set { SetValue(TextProperty, value); }
         }
+        public IEditTextValidater Validater;
         public event EventHandler OnEditBoxModified;
+        private string SavedString = string.Empty;
+        private bool NeedRestore = false;
         private static void OnTextChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             (obj as EditableTextBlock).OnEditBoxModified?.Invoke(obj,new EventArgs());
@@ -46,18 +53,37 @@ namespace SimpleTimeRecorder
             ShowText.Visibility = Visibility.Collapsed;
             EditBox.Visibility = Visibility.Visible;
             EditBox.Focus();
+            SavedString = Text;
+            NeedRestore = true;
         }
 
         private void EditBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ShowText.Visibility = Visibility.Visible;
             EditBox.Visibility = Visibility.Collapsed;
+            if(NeedRestore)
+            {
+                Text = SavedString;
+                ShowText.Text = Text;
+                EditBox.Text = Text;
+            }
+            else
+            {
+                Text = EditBox.Text;
+                ShowText.Text = EditBox.Text;
+            }
+            NeedRestore = false;
         }
 
         private void EditBox_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.Key == Key.Enter)
             {
+                if(Validater == null || 
+                    Validater != null && Validater.IsTextValid(EditBox.Text))
+                {
+                    NeedRestore = false;
+                }
                 System.Windows.Input.Keyboard.ClearFocus();
                 EditBox.RaiseEvent(new RoutedEventArgs(LostFocusEvent, EditBox));
             }

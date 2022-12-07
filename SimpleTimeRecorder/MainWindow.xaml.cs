@@ -41,10 +41,27 @@ namespace SimpleTimeRecorder
                 return SaveDirectory + "\\" +  SaveFileName + ".json";
             } 
         }
+        private DateTime InitialSaveTime { get; set; }
         private DateTime LastSaveTime { get; set; }
         private bool RecordVisible = true;
         private DispatcherTimer ElapsedTimer = null;
-        private List<RecordData> Records
+        private IEnumerable<Record> RecordList
+        {
+            get
+            {
+                return RecordStack.Children.OfType<Record>();
+            }
+        }
+        private List<Record> Records
+        {
+            get
+            {
+                var recordList = RecordStack.Children.OfType<Record>().ToList();
+                recordList.Reverse();
+                return recordList;
+            }
+        }
+        private List<RecordData> RecordDatas
         {
             get
             {
@@ -64,15 +81,10 @@ namespace SimpleTimeRecorder
 
             DateTime Date = DateTime.Now;
             SaveFileName = Date.ToString("yyyy-MM-dd");
-            
-            if(SetupHistory())
-            {
-                LastSaveTime = Records.Last().Date;
-            }
-            else
-            {
-                LastSaveTime = Date;
-            }
+
+            SetupHistory();
+
+            UpdateLastSaveTime();
             
             // enable all screen drag
             MouseLeftButtonDown += (sender, e) =>
@@ -109,16 +121,35 @@ namespace SimpleTimeRecorder
         {
             if(!File.Exists(SaveFileFullPath))
             {
+                InitialSaveTime = DateTime.Now;
                 return false;
             }
             string JsonString = File.ReadAllText(SaveFileFullPath);
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                                
+            };
 
-            List<RecordData> TmpRecords = JsonSerializer.Deserialize<List<RecordData>>(JsonString);
+            List<RecordData> TmpRecords;
+            try
+            {
+                TmpRecords = JsonSerializer.Deserialize<List<RecordData>>(JsonString, options);
+            }
+            catch (Exception e)
+            {
+                InitialSaveTime = DateTime.Now;
+                return false;
+            }
+            
+            
             TmpRecords.ForEach((r) => 
             {
                 Record record = AddRecord(r.ActionText, r.Date, r.Elapsed,true);
                 RegisterCallback(record);
             });
+
+            RecordData First = TmpRecords.First();
+            InitialSaveTime = First.Date - First.Elapsed;
 
             EventHandler copy=null;
             EventHandler action = (s, e) =>
@@ -130,10 +161,46 @@ namespace SimpleTimeRecorder
             ContentRendered += action;
             return true;
         }
+        private void RecalculateElapsedTime(Record record)
+        {
+            RecordData modifiedRecordData = record.Data;
+            int Index = RecordDatas.FindIndex((r) => { return r == record.Data; });
+            DateTime preRecordDate;
+            if (Index == 0)
+            {
+                preRecordDate = InitialSaveTime;
+            }
+            else
+            {
+                preRecordDate = RecordDatas[Index - 1].Date;
+            }
+            modifiedRecordData.Elapsed = modifiedRecordData.Date - preRecordDate;
+            record.Data = modifiedRecordData;
+        }
+        private void UpdateLastSaveTime()
+        {
+            if(RecordDatas.Count > 0)
+            {
+                LastSaveTime = RecordDatas.Last().Date;
+            }
+            else
+            {
+                LastSaveTime = DateTime.Now;
+            }
+        }
         private void RegisterCallback(Record record)
         {
             record.OnDataModified += (s, e) =>
             {
+                // recalculate elapsed time
+                RecalculateElapsedTime(record);
+                int Index = RecordDatas.FindIndex((r) => { return r == record.Data; });
+                if(Index < RecordDatas.Count - 1)
+                {
+                    RecalculateElapsedTime(Records[Index + 1]);
+                }
+                UpdateLastSaveTime();
+
                 ExportRecords();
             };
         }
@@ -162,7 +229,7 @@ namespace SimpleTimeRecorder
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All),
                 WriteIndented = true,
             };
-            string JsonString = JsonSerializer.Serialize(Records, options);
+            string JsonString = JsonSerializer.Serialize(RecordDatas, options);
             StreamWriter writer = new StreamWriter(SaveFileFullPath, false, Encoding.UTF8);
             writer.Write(JsonString);
             writer.Close();
@@ -176,7 +243,7 @@ namespace SimpleTimeRecorder
             ExportRecords();
 
             UpdateWindowSize();
-            LastSaveTime = now;
+            UpdateLastSaveTime();
             ActionTextBox.Text = string.Empty;
 
         }

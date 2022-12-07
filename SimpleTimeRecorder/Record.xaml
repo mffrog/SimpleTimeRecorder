@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <Rectangle Grid.ColumnSpan="3" Width="Auto" Height="2" VerticalAlignment="Top" Fill="{StaticResource AccentColor}"/>
         <StackPanel>
-            <TextBlock x:Name="Time" Text="HH:mm" FontSize="16" Foreground="White" Margin="2"/>
+            <local:EditableTextBlock x:Name="Time" Text="HH:mm" FontSize="16" Foreground="White" Margin="2"/>
             <TextBlock x:Name="Elapsed" Text="HH:mm" FontSize="16" Foreground="White" Margin="2" Visibility="Collapsed"/>
         </StackPanel>
         <local:EditableTextBlock x:Name="ActionText" Text="Action" FontSize="28" Grid.Column="1" Foreground="White" Margin="2,2,0,0"/>
