@@ -22,14 +22,23 @@ namespace SimpleTimeRecorder
     [JsonConverter(typeof(RecordDataJsonConverter))]
     public struct RecordData
     {
+        public RecordData(DateTime dateTime,TimeSpan timeSpan, string actionText, List<string> tags)
+        {
+            Date = dateTime;
+            Elapsed = timeSpan;
+            ActionText= actionText;
+            Tags = tags;
+        }
         public DateTime Date { get; set; }
         public TimeSpan Elapsed { get; set; }
         public string ActionText { get; set; }
+        public List<string> Tags { get; set; }
         public static bool operator ==(RecordData lhs, RecordData rhs)
         {
             return lhs.Date == rhs.Date &&
                 lhs.Elapsed == rhs.Elapsed &&
-                lhs.ActionText == rhs.ActionText;
+                lhs.ActionText == rhs.ActionText &&
+                lhs.Tags == rhs.Tags;
         }
         public static bool operator !=(RecordData lhs, RecordData rhs)
         {
@@ -50,27 +59,48 @@ namespace SimpleTimeRecorder
             string dateString = string.Empty;
             string elapsedString = string.Empty;
             string actionText = string.Empty;
+            List<string> tags = new List<string>();
             while (reader.Read())
             {
                 if(propertyName.Length > 0)
                 {
+                    bool ClearPropertyName = false;
                     switch (propertyName)
                     {
                         case "Date":
                             dateString = reader.GetString();
+                            ClearPropertyName = true;
                             break;
                         case "Elapsed":
                             elapsedString = reader.GetString();
+                            ClearPropertyName = true;
                             break;
                         case "ActionText":
                             actionText = reader.GetString();
+                            ClearPropertyName = true;
+                            break;
+                        case "Tags":
+                            if(reader.TokenType == JsonTokenType.StartArray)
+                            {
+                            }
+                            else if(reader.TokenType == JsonTokenType.EndArray)
+                            {
+                                ClearPropertyName = true;
+                            }
+                            else if(reader.TokenType == JsonTokenType.String)
+                            {
+                                tags.Add(reader.GetString());
+                            }
                             break;
                         default:
                             break;
                     }
-                    propertyName = string.Empty;
+                    if(ClearPropertyName) 
+                    {
+                        propertyName = string.Empty;
+                    }
                 }
-                if(reader.TokenType == JsonTokenType.PropertyName)
+                if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     propertyName = reader.GetString();
                 }
@@ -84,7 +114,8 @@ namespace SimpleTimeRecorder
             {
                 Date = DateTime.ParseExact(dateString, DateFormat,CultureInfo.InvariantCulture),
                 Elapsed = TimeSpan.ParseExact(elapsedString, ElapsedFormat, CultureInfo.InvariantCulture),
-                ActionText = actionText
+                ActionText = actionText,
+                Tags= tags,
             };
         }
         public override void Write(Utf8JsonWriter writer, RecordData value, JsonSerializerOptions options)
@@ -93,6 +124,15 @@ namespace SimpleTimeRecorder
             writer.WriteString("Date", value.Date.ToString(DateFormat));
             writer.WriteString("Elapsed", value.Elapsed.ToString(ElapsedFormat));
             writer.WriteString("ActionText",value.ActionText);
+            writer.WriteStartArray("Tags");
+            if(value.Tags != null)
+            {
+                foreach(var tag in value.Tags)
+                {
+                    writer.WriteStringValue(tag);
+                }
+            }
+            writer.WriteEndArray();
             writer.WriteEndObject();
         }
     }
