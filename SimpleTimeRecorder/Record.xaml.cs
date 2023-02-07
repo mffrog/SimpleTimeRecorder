@@ -22,9 +22,28 @@ namespace SimpleTimeRecorder
     [JsonConverter(typeof(RecordDataJsonConverter))]
     public struct RecordData
     {
+        public RecordData(DateTime dateTime,TimeSpan timeSpan, string actionText, List<string> tags)
+        {
+            Date = dateTime;
+            Elapsed = timeSpan;
+            ActionText= actionText;
+            Tags = tags;
+        }
         public DateTime Date { get; set; }
         public TimeSpan Elapsed { get; set; }
         public string ActionText { get; set; }
+        public List<string> Tags { get; set; }
+        public static bool operator ==(RecordData lhs, RecordData rhs)
+        {
+            return lhs.Date == rhs.Date &&
+                lhs.Elapsed == rhs.Elapsed &&
+                lhs.ActionText == rhs.ActionText &&
+                lhs.Tags == rhs.Tags;
+        }
+        public static bool operator !=(RecordData lhs, RecordData rhs)
+        {
+            return !(lhs == rhs);
+        }
     }
     public class RecordDataJsonConverter : JsonConverter<RecordData>
     {
@@ -40,27 +59,48 @@ namespace SimpleTimeRecorder
             string dateString = string.Empty;
             string elapsedString = string.Empty;
             string actionText = string.Empty;
+            List<string> tags = new List<string>();
             while (reader.Read())
             {
                 if(propertyName.Length > 0)
                 {
+                    bool ClearPropertyName = false;
                     switch (propertyName)
                     {
                         case "Date":
                             dateString = reader.GetString();
+                            ClearPropertyName = true;
                             break;
                         case "Elapsed":
                             elapsedString = reader.GetString();
+                            ClearPropertyName = true;
                             break;
                         case "ActionText":
                             actionText = reader.GetString();
+                            ClearPropertyName = true;
+                            break;
+                        case "Tags":
+                            if(reader.TokenType == JsonTokenType.StartArray)
+                            {
+                            }
+                            else if(reader.TokenType == JsonTokenType.EndArray)
+                            {
+                                ClearPropertyName = true;
+                            }
+                            else if(reader.TokenType == JsonTokenType.String)
+                            {
+                                tags.Add(reader.GetString());
+                            }
                             break;
                         default:
                             break;
                     }
-                    propertyName = string.Empty;
+                    if(ClearPropertyName) 
+                    {
+                        propertyName = string.Empty;
+                    }
                 }
-                if(reader.TokenType == JsonTokenType.PropertyName)
+                if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     propertyName = reader.GetString();
                 }
@@ -74,7 +114,8 @@ namespace SimpleTimeRecorder
             {
                 Date = DateTime.ParseExact(dateString, DateFormat,CultureInfo.InvariantCulture),
                 Elapsed = TimeSpan.ParseExact(elapsedString, ElapsedFormat, CultureInfo.InvariantCulture),
-                ActionText = actionText
+                ActionText = actionText,
+                Tags= tags,
             };
         }
         public override void Write(Utf8JsonWriter writer, RecordData value, JsonSerializerOptions options)
@@ -83,7 +124,37 @@ namespace SimpleTimeRecorder
             writer.WriteString("Date", value.Date.ToString(DateFormat));
             writer.WriteString("Elapsed", value.Elapsed.ToString(ElapsedFormat));
             writer.WriteString("ActionText",value.ActionText);
+            writer.WriteStartArray("Tags");
+            if(value.Tags != null)
+            {
+                foreach(var tag in value.Tags)
+                {
+                    writer.WriteStringValue(tag);
+                }
+            }
+            writer.WriteEndArray();
             writer.WriteEndObject();
+        }
+    }
+    public class TimeTextValidater : IEditTextValidater
+    {
+        private Record record = null;
+        public TimeTextValidater(Record record)
+        {
+            this.record = record;
+        }
+        public bool IsTextValid(string Text)
+        {
+            DateTime newDate;
+            if(!DateTime.TryParseExact(Text, @"H:mm", null, DateTimeStyles.None, out newDate))
+            {
+                return false;
+            }
+            if(newDate < (record.Data.Date - record.Data.Elapsed))
+            {
+                return false;
+            }
+            return true;
         }
     }
     /// <summary>
@@ -112,7 +183,25 @@ namespace SimpleTimeRecorder
             ActionText.OnEditBoxModified += (s,e)=> 
             {
                 data.ActionText = ActionText.Text;
-                OnDataModified?.Invoke(s,e); 
+                OnDataModified?.Invoke(this,e); 
+            };
+            Time.Validater = new TimeTextValidater(this);
+            Time.OnEditBoxModified += (s, e) =>
+            {
+                DateTime date = data.Date;
+                if(DateTime.TryParseExact(Time.Text, @"H:mm", null,DateTimeStyles.None, out date))
+                {
+                    data.Date = new DateTime
+                    (
+                    date.Date.Year,
+                    date.Date.Month,
+                    date.Date.Day,
+                    date.Hour,
+                    date.Minute,
+                    date.Date.Second
+                    );
+                    OnDataModified?.Invoke(this, e);
+                }
             };
         }
     }

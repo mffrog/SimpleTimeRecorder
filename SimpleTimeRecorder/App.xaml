@@ -8,7 +8,7 @@
         <SolidColorBrush x:Key="BaseColor" Color="Black"/>
         <SolidColorBrush x:Key="DarkGray" Color="#FF191919"/>
         <SolidColorBrush x:Key="MainColor" Color="#FF3C3C3C"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#FF3C3C3C"/>
+        <SolidColorBrush x:Key="AccentColor" Color="DarkCyan"/>
         <SolidColorBrush x:Key="TriggerColor" Color="#FF4C4C4C"/>
         <SolidColorBrush x:Key="HighlightColor" Color="#FF5C5C5C"/>
         <SolidColorBrush x:Key="OnHover" Color="Gray"/>

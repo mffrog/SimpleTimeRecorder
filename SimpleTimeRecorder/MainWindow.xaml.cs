@@ -18,6 +18,7 @@ using System.IO;
 using System.Windows.Threading;
 using System.Text.Json;
 using System.Text.Unicode;
+using System.Windows.Markup;
 
 
 namespace SimpleTimeRecorder
@@ -41,10 +42,36 @@ namespace SimpleTimeRecorder
                 return SaveDirectory + "\\" +  SaveFileName + ".json";
             } 
         }
+        private DateTime InitialSaveTime { get; set; }
         private DateTime LastSaveTime { get; set; }
         private bool RecordVisible = true;
         private DispatcherTimer ElapsedTimer = null;
-        private List<RecordData> Records
+        private IEnumerable<Record> RecordList
+        {
+            get
+            {
+                return RecordStack.Children.OfType<Record>();
+            }
+        }
+        private List<string> ActiveTags
+        {
+            get
+            {
+                var tagList = TagList.Children.OfType<Tag>();
+                var filtered = tagList.Where(t => { return t.IsChecked; });
+                return filtered.Select(t => { return t.TagName.Text; }).ToList();
+            }
+        }
+        private List<Record> Records
+        {
+            get
+            {
+                var recordList = RecordStack.Children.OfType<Record>().ToList();
+                recordList.Reverse();
+                return recordList;
+            }
+        }
+        private List<RecordData> RecordDatas
         {
             get
             {
@@ -64,15 +91,11 @@ namespace SimpleTimeRecorder
 
             DateTime Date = DateTime.Now;
             SaveFileName = Date.ToString("yyyy-MM-dd");
-            
-            if(SetupHistory())
-            {
-                LastSaveTime = Records.Last().Date;
-            }
-            else
-            {
-                LastSaveTime = Date;
-            }
+
+            SetupHistory();
+            SetupTagList();
+
+            UpdateLastSaveTime();
             
             // enable all screen drag
             MouseLeftButtonDown += (sender, e) =>
@@ -109,16 +132,35 @@ namespace SimpleTimeRecorder
         {
             if(!File.Exists(SaveFileFullPath))
             {
+                InitialSaveTime = DateTime.Now;
                 return false;
             }
             string JsonString = File.ReadAllText(SaveFileFullPath);
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                                
+            };
 
-            List<RecordData> TmpRecords = JsonSerializer.Deserialize<List<RecordData>>(JsonString);
+            List<RecordData> TmpRecords;
+            try
+            {
+                TmpRecords = JsonSerializer.Deserialize<List<RecordData>>(JsonString, options);
+            }
+            catch (Exception e)
+            {
+                InitialSaveTime = DateTime.Now;
+                return false;
+            }
+            
+            
             TmpRecords.ForEach((r) => 
             {
-                Record record = AddRecord(r.ActionText, r.Date, r.Elapsed,true);
+                Record record = AddRecord(r,true);
                 RegisterCallback(record);
             });
+
+            RecordData First = TmpRecords.First();
+            InitialSaveTime = First.Date - First.Elapsed;
 
             EventHandler copy=null;
             EventHandler action = (s, e) =>
@@ -130,29 +172,83 @@ namespace SimpleTimeRecorder
             ContentRendered += action;
             return true;
         }
+        private void SetupTagList()
+        {
+            TagList.Children.Clear();
+            string[] Tags = Properties.Settings.Default.Tags.Split(',');
+            foreach (string tag in Tags)
+            {
+                if (tag.Length > 0)
+                {
+                    var tagControll = new Tag();
+                    tagControll.TagName.Text = tag;
+                    TagList.Children.Add(tagControll);
+                }
+            }
+        }
+        private void RecalculateElapsedTime(Record record)
+        {
+            RecordData modifiedRecordData = record.Data;
+            int Index = RecordDatas.FindIndex((r) => { return r == record.Data; });
+            DateTime preRecordDate;
+            if (Index == 0)
+            {
+                preRecordDate = InitialSaveTime;
+            }
+            else
+            {
+                preRecordDate = RecordDatas[Index - 1].Date;
+            }
+            modifiedRecordData.Elapsed = modifiedRecordData.Date - preRecordDate;
+            record.Data = modifiedRecordData;
+        }
+        private void UpdateLastSaveTime()
+        {
+            if(RecordDatas.Count > 0)
+            {
+                LastSaveTime = RecordDatas.Last().Date;
+            }
+            else
+            {
+                LastSaveTime = DateTime.Now;
+            }
+        }
         private void RegisterCallback(Record record)
         {
             record.OnDataModified += (s, e) =>
             {
+                // recalculate elapsed time
+                RecalculateElapsedTime(record);
+                int Index = RecordDatas.FindIndex((r) => { return r == record.Data; });
+                if(Index < RecordDatas.Count - 1)
+                {
+                    RecalculateElapsedTime(Records[Index + 1]);
+                }
+                UpdateLastSaveTime();
+
                 ExportRecords();
             };
         }
-        private Record AddRecord(string actionText, DateTime dateTime, TimeSpan span, bool registerCallabck)
+        private Record AddRecord(string actionText, DateTime dateTime, TimeSpan span,List<string> tags, bool registerCallabck)
         {
             var data = new RecordData
             {
                 Date = dateTime,
                 ActionText = actionText,
-                Elapsed = span
+                Elapsed = span,
+                Tags = tags,
             };
-            
+            return AddRecord(data,registerCallabck);
+        }
+        private Record AddRecord(RecordData recordData,bool registerCallabck)
+        {
             var record = new Record();
-            record.Data = data;
-            if(registerCallabck)
+            record.Data = recordData;
+            if (registerCallabck)
             {
                 RegisterCallback(record);
             }
-            RecordStack.Children.Insert(0,record);
+            RecordStack.Children.Insert(0, record);
             return record;
         }
         private void ExportRecords()
@@ -162,7 +258,7 @@ namespace SimpleTimeRecorder
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All),
                 WriteIndented = true,
             };
-            string JsonString = JsonSerializer.Serialize(Records, options);
+            string JsonString = JsonSerializer.Serialize(RecordDatas, options);
             StreamWriter writer = new StreamWriter(SaveFileFullPath, false, Encoding.UTF8);
             writer.Write(JsonString);
             writer.Close();
@@ -171,12 +267,12 @@ namespace SimpleTimeRecorder
         {
             DateTime now = DateTime.Now;
             var sub = (now - LastSaveTime);
-            AddRecord(ActionTextBox.Text, now, sub,true);
+            AddRecord(ActionTextBox.Text, now, sub,ActiveTags,true);
             
             ExportRecords();
 
             UpdateWindowSize();
-            LastSaveTime = now;
+            UpdateLastSaveTime();
             ActionTextBox.Text = string.Empty;
 
         }
@@ -204,7 +300,21 @@ namespace SimpleTimeRecorder
             Properties.Settings.Default.SaveDirectoryName = SaveDirectory;
             Properties.Settings.Default.Save();
         }
+        private void RegisterTag(object sender, RoutedEventArgs e)
+        {
+            var tags = Properties.Settings.Default.Tags;
+            if(tags.Count() > 0)
+            {
+                tags += ',';
+                
+            }
+            tags += ActionTextBox.Text;
+            Properties.Settings.Default.Tags = tags;
+            Properties.Settings.Default.Save();
+            ActionTextBox.Text = string.Empty;
 
+            SetupTagList();
+        }
         private void ActionTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if(e.Key == Key.Enter)
@@ -236,6 +346,13 @@ namespace SimpleTimeRecorder
             {
                 System.Diagnostics.Process.Start(SaveDirectory);
             }
+        }
+
+        private void ClearTags(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Tags = "";
+            Properties.Settings.Default.Save();
+            SetupTagList();
         }
     }
 }

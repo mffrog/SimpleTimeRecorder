@@ -64,14 +64,14 @@
             </Grid.RowDefinitions>
             <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="32" Background="{StaticResource AccentColor}">
                 <TextBlock Text="SimpleTimeRecorder" Foreground="GhostWhite" TextAlignment="Left" Canvas.Left="10" Canvas.Top="8" FontFamily="Calibri"/>
-                <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Left="400" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
+                <Button Style="{StaticResource SystemButton}" FontFamily="Marlett" Content="r" FontSize="15" Width="50" Height="32" Canvas.Right="0" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}" Click="CloseClicked">
                 </Button>
 
             </Canvas>
-            <Grid x:Name="ToolBar" Width="48" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top" Height="25">
+            <Grid x:Name="ToolBar" Width="48" HorizontalAlignment="Left" Margin="0,32,0,0" VerticalAlignment="Top" Height="145">
                 <Grid.Resources>
                     <Storyboard x:Key="Maximize">
-                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="115"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="145"/>
                     </Storyboard>
                     <Storyboard x:Key="Minimize">
                         <DoubleAnimation Storyboard.TargetProperty="(Height)" BeginTime="00:00:00" Duration="00:00:00.2" To="25"/>
@@ -107,6 +107,8 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
+                    <Button Content="a" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterTag"/>
+                    <Button Content="q" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ClearTags"/>
                     <Button x:Name="RegisterSaveDirectoryButton" Content="2" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="RegisterSaveDirectory"/>
                     <Button Content="1" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="OpenSaveDirectory"/>
                     <Button Content="6" FontFamily="Marlett" Style="{StaticResource SystemButton}" Click="ShowRecord"/>
@@ -132,6 +134,9 @@
                 <StackPanel x:Name="RecordStack" Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch" Margin="2,0">
 
                 </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False" HorizontalAlignment="Right" Margin="0,50,10,50">
+                <StackPanel x:Name="TagList" HorizontalAlignment="Right" Width="60"/>
             </ScrollViewer>
         </Grid>
     </Border>
